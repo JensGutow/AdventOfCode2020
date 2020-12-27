@@ -3,36 +3,20 @@ from collections import deque
 import math
 from collections import defaultdict
 from itertools import permutations
-#import numpy as np
+import numpy as np
 
 class tile():
     def __init__(self, s_input:str):
         zeilen = s_input.split("\n")
         dim = len(zeilen) - 1
         self.id = int(zeilen[0].split()[1].replace(":",""))
-        #self.matrix = np.array(list("".join(zeilen[1:]))).reshape(dim,dim)
-        daten = zeilen[1:]
-        oben = daten[0]
-        unten = self.flip_int(daten[-1])
-        rechts = links = ""
-        for zeile in daten:
-            rechts += zeile[-1]
-            links = zeile[0] + links
-        self.d = deque()
-
-        self.d.append(oben)
-        self.d.append(rechts)
-        self.d.append(unten)
-        self.d.append(links)   
-
+        self.matrix = np.array(list("".join(zeilen[1:]))).reshape(dim,dim)
         self.orientierung = 0     
         self.flip_state = 0
-
         self.borders = set()
-
         while True:
-            for v in self.d:
-                self.borders.add(v) 
+            for richtung in range(4):
+                self.borders.add(self.get_border(richtung)) 
             self.flip()
             if not self.flip_state:
                 break
@@ -46,29 +30,19 @@ class tile():
     def rotate(self):
         self.orientierung += 1
         self.orientierung %= 4
-        self.d.rotate()
-
-    def flip_data(self):
-        temp = self.d[1]
-        self.d[1] = self.flip_int(self.d[3])
-        self.d[3] = self.flip_int(temp)
-        self.d[0] = self.flip_int(self.d[0])
-        self.d[2] = self.flip_int(self.d[2])
+        self.matrix = np.rot90(self.matrix,-1)
 
     def flip(self):
         self.flip_state += 1
         self.flip_state %= 4
-        if self.flip_state % 2 == 0:
-            self.d.rotate()
-        self.flip_data()
-        if self.flip_state % 2 == 0:
-            self.d.rotate(-1)
+        axis = 1 if self.flip_state % 2 == 0 else 0
+        self.matrix = np.flip(self.matrix, axis=axis)
 
     def get_border(self,index):
-        value = self.d[index]
+        zeile = "".join(np.rot90(self.matrix, index)[0])
         if index > 1:
-            value = self.flip_int(value)
-        return value
+            zeile = self.flip_int(zeile)
+        return zeile
    
     @staticmethod
     def flip_int(s):
@@ -76,9 +50,9 @@ class tile():
 
     def __str__(self):
         s = "id:" + str(self.id)  + " orientierung:" + str(self.orientierung) + " flip_state:" + str(self.flip_state) + "\n" 
-        s += "Daten (intern / get)\n"
+        s += "Kanten \n"
         for i in range(4):
-            s += str(self.d[i]) + "\t" + str(self.get_border(i)) + "\n"
+            s += str(self.get_border(i)) + "\n"
         return s
 
 def get_puzzle(file_name):
@@ -87,7 +61,12 @@ def get_puzzle(file_name):
         p = f.read().split("\n\n")
     return p
 
-p = get_puzzle("tag_20.txt")
+file_name = "tag_20.txt"
+print("Eingabe File:", file_name)
+p = get_puzzle(file_name)
+
+#startzeit für Lösung 1
+start = time.perf_counter()
 
 tiles = [tile(item) for item in p]
 
@@ -144,6 +123,15 @@ for tile1, tile2 in permutations(tiles, 2):
 
 #Liste von Ecken-Fotos
 ECKEN_TILES = [FOTO_DICT[id] for id in NACHBAR_FOTOS if len(NACHBAR_FOTOS[id]) == 2]
+
+print("Task 1")
+l1 = math.prod([foto.id for foto in ECKEN_TILES])
+print(l1, time.perf_counter()-start)
+
+#start für Lösung 2
+print("Task 2")
+start = time.perf_counter()
+
 #-> allgemein: Dictonary: i -> set(fotos): i: Anzahl von Nachbarn -> value: Menge von Fotos, die i Nachbarn haben
 N_NACHBAR_FOTO_ID_DIR = {} 
 for i in range(2,5):
@@ -159,7 +147,6 @@ loesung.append(tile_0)
 #   - gemeinsame Kante mit tile_0 hat
 
 foto_ids_all = {tile.id  for tile in tiles if tile != loesung[0] } # initial: alle foto ids
-print(len(foto_ids_all))
 
 # Erstelle losung mit Fotos auf den Plaetzen - unter Beachtung der Kantenbeziehung zwischen Nachbarn und 
 # der  Anzahl der möglichen Nachbarn auf der Position
@@ -184,9 +171,8 @@ for i in range(1,N):
     foto_id = foto_ids.pop()
     # vermindere die Menge der zur Verfügung stehenden ids um die ausgewählte id
     foto_ids_all.remove(foto_id)
+    # Aktualisiere Lösungsmenge -> nächste Schleife oder Ende
     loesung.append(FOTO_DICT[foto_id])
-
-print(len(loesung))
 
 # Drehe und Flippe jedes Teil so, dass alle Kantenbeziehungen i.o. sind
 # sonderbehandlung des 1. Elements
@@ -236,13 +222,121 @@ for i in range(N):
         if item_0.get_border(r) != item_1.get_border(RichtungGegenseite[r]):
             print("FEHLER bei ids:",i, id2," Richtung:",r)
 
+#########################################
 # Bisher wurden nur die Ränder betrachtet und manipuliert
 # Nun ist es Ziel, ausgehend von der Lösung ein grosses Array von Zeichen zu erhalten, in dem das Seemonster gesucht wird.
-# Die Suche wird als erstes mit Hilfe regulärer Ausdrücke realisiert.
-# Motivation: mit Hlfe von find_all werden alle Fundstellen auf einmal gefunden.
 # Für die Manipulation und Generierung der Matrix wird das Modul numpy verwendet 
 # - Funktionen zum Rotieren/Flippen
-# - Funktionen zum Erzeugen / Ändern der internen Dimension / horizontales/vertikales Anhänen
+# - Funktionen zum Erzeugen / Ändern der internen Dimension / horizontales/vertikales Anhängen
 # - shöne Übersicht: https://www.w3resource.com/numpy/manipulation/squeeze.php
+# Das Seemonster wird als kleines numpy Array realisiert und dann im grossen Array gesucht.
+#   diese Suche wird realisiert, indem ein kleines Sub-Array aus dem grossen geholt wird 
 
-print("uff")
+# Aufbau eines "grossen"-Lösungsarrays
+def get_zeile(foto_array, start_id, zeile_in_matrix):
+    zeile = np.array([])
+    dim = int(math.sqrt(len(foto_array)))
+    for foto_id in range(start_id, start_id + dim):
+        zeile = np.hstack((zeile, foto_array[foto_id].matrix[zeile_in_matrix][1:-1])) 
+    return zeile
+
+
+def get_big_picture(foto_array):
+    dim = int(math.sqrt(len(foto_array)))
+    matrix_dim = len(foto_array[0].matrix)
+    big_picture = np.array([])
+    for dim_zeile in range(dim):
+        start_foto_id = dim_zeile * dim
+        for sub_zeile in range(1,matrix_dim-1):
+            if not dim_zeile and not sub_zeile:
+                big_picture_zeile = get_zeile(foto_array, start_foto_id, sub_zeile)
+            elif not sub_zeile:
+                continue
+            else:
+                big_picture_zeile = get_zeile(foto_array, start_foto_id, sub_zeile)
+            big_picture =  np.concatenate((big_picture,big_picture_zeile)) if len(big_picture) else big_picture_zeile
+    dim_big_pciture = int(math.sqrt(len(big_picture)))
+    big_picture.reshape(dim_big_pciture, dim_big_pciture)
+    return big_picture
+
+
+class monstser_suche():
+    def __init__(self, big_picture, monster, monster_dim):
+        self.matrix = big_picture
+        self.n1 = sum(np.char.count(self.matrix,"#"))
+        self.n2 = monster.count("#")
+        self.shuffle_status = 0
+        self.dim = int(math.sqrt(len(self.matrix)))
+        self.matrix = self.matrix.reshape(self.dim, self.dim)
+        self.monster = np.array(list(monster.replace("\n",""))) == "#"
+        self.monster.shape = monster_dim
+        self.monster_dim = monster_dim
+
+    def shuffle(self):
+        self.shuffle_status += 1
+        self.matrix = np.rot90(self.matrix)
+        if self.shuffle_status % 4 == 0:
+            self.matrix = np.flip(self.matrix, 0)
+        if self.shuffle_status % 8 == 0:
+            self.matrix = np.flip(self.matrix, 1)
+            self.shuffle_status = 0
+
+    def get_subarray(self, zeile,spalte):
+        sa = np.array(["."]*self.monster_dim[0]*self.monster_dim[1])
+        sa.shape = self.monster_dim
+        for z in range(self.monster_dim[0]):
+            for s in range(self.monster_dim[1]):
+                sa[z,s] = self.matrix[z+zeile, s+spalte]
+        return sa
+
+    def find_monster(self):
+        findings = []
+        tiefe = None
+        for zeile in range(0, self.dim - self.monster_dim[0]):
+            for spalte in range(0, self.dim - self.monster_dim[1]):
+                sub_arr = self.get_subarray(zeile,spalte) 
+                sub_arr = sub_arr == "#"
+                check = np.bitwise_and(sub_arr, self.monster)
+                if (check == self.monster).all():
+                    findings.append((zeile,spalte))
+        tiefe = None if not findings else self.n1 - self.n2*len(findings)
+        return tiefe
+
+    def print_matrix(self):   
+        for zeile in self.matrix:
+            s = ""
+            for c in zeile:
+                s+=c
+            print(s)
+
+
+big_picture = get_big_picture(loesung)
+monster = "                  # #    ##    ##    ### #  #  #  #  #  #   "
+
+ms = monstser_suche(big_picture,monster, (3,20))
+
+n = 0
+while True:
+    n += 1
+    findings = ms.find_monster()
+    if not findings:
+        ms.shuffle()
+        if n > 50:
+            break
+    else:
+        break
+
+print(findings, time.perf_counter()-start)
+        
+
+
+
+        
+    
+
+    
+
+
+
+
+

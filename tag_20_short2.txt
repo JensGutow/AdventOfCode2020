@@ -1,0 +1,23 @@
+Tile 1234:
+1234
+5675
+9126
+qwer
+
+Tile 32:
+4aaa
+56bb
+67cc
+rlla
+
+Tile 33:
+qwer
+blab
+blub
+schl
+
+Tile 34:
+rlla
+b79d
+be9e
+lfff
