@@ -89,6 +89,26 @@ Ideen:
 
 Aufgabe 2:
 ==========
+Now that you've isolated the inert ingredients, you should have enough information to figure out which ingredient contains which allergen.
+
+In the above example:
+
+    mxmxvkd contains dairy.
+    sqjhc contains fish.
+    fvjkl contains soy.
+
+Arrange the ingredients alphabetically by their allergen and separate them by commas to produce your canonical dangerous ingredient list. 
+(There should not be any spaces in your canonical dangerous ingredient list.) 
+In the above example, this would be mxmxvkd,sqjhc,fvjkl.
+
+Algo:
+-----
+#task 2 - cleanup zutaten-allergen dir
+# a) suche in AlergenByZutat nach Einträgen mit eine AlergenenListe mit Länge 1 -> Allergen_1
+# b) suche in AlergenByZutat nach Einträgen mit einer AlergenenListe mit Länge > 1, die Durchschnitt mit Allergen_1 haben
+# -> entfernte alle Allergen_1 einträge aus den Findings
+# Abbruch, wenn in b) nichts mehr gefunden werden kann
+
 '''
 def get_puzzle(file_name):
     p = []
@@ -131,6 +151,10 @@ l1 = sum([len(set(zutaten).intersection(ZutatenOhneAlergene)) for (zutaten,_) in
 print("Task 1: (summe aller Zutaten ohne allergen in foods):", l1)
 
 #task 2 - cleanup zutaten-allergen dir
+# a) suche in AlergenByZutat nach Einträgen mit eine AlergenenListe mit Länge 1 -> Allergen_1
+# b) suche in AlergenByZutat nach Einträgen mit einer AlergenenListe mit Länge > 1, die Durchschnitt mit Allergen_1 haben
+# -> entfernte alle Allergen_1 einträge aus den Findings
+# Abbruch, wenn in b) nichts mehr gefunden werden kann
 weiter = True
 while weiter:
     weiter = False
@@ -145,14 +169,14 @@ while weiter:
     if z_list:
         weiter = True
         #lösche alle a_set
-        for a in a_set:
-            for z in z_list:
-                AlergenByZutat[z].discard(a)
+        for z in z_list:
+            AlergenByZutat[z] = AlergenByZutat[z] - a_set
 print("Task2")
 # suche nun zutaten-allergen-Pärchen, mit len(Allergen)>0 (ist nicht leer)
 l2 = [(z,a_item) for (z,a) in AlergenByZutat.items() if len(a)>0 for a_item in a]
 # sortiere die Liste nach dem Allergen (dem zweiten Element des Tupels)
 l2.sort(key=lambda tup: tup[1])
+# Ausgabe der nach Alergen sorierten Zutaten(Komma getrennt)
 first = True
 s = ""
 for z in l2:
