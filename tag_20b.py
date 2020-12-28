@@ -1,3 +1,332 @@
+'''
+https://adventofcode.com/2020/day/20
+--- Day 20: Jurassic Jigsaw ---
+
+The high-speed train leaves the forest and quickly carries you south. You can even see a desert in the distance! Since you have some spare time, you might as well see if there was anything interesting in the image the Mythical Information Bureau satellite captured.
+
+After decoding the satellite messages, you discover that the data actually contains many small images created by the satellite's camera array. The camera array consists of many cameras; rather than produce a single square image, they produce many smaller square image tiles that need to be reassembled back into a single image.
+
+Each camera in the camera array returns a single monochrome image tile with a random unique ID number. The tiles (your puzzle input) arrived in a random order.
+
+Worse yet, the camera array appears to be malfunctioning: each image tile has been rotated and flipped to a random orientation. Your first task is to reassemble the original image by orienting the tiles so they fit together.
+
+To show how the tiles should be reassembled, each tile's image data includes a border that should line up exactly with its adjacent tiles. All tiles have this border, and the border lines up exactly when the tiles are both oriented correctly. Tiles at the edge of the image also have this border, but the outermost edges won't line up with any other tiles.
+
+For example, suppose you have the following nine tiles:
+
+Tile 2311:
+..##.#..#.
+##..#.....
+#...##..#.
+####.#...#
+##.##.###.
+##...#.###
+.#.#.#..##
+..#....#..
+###...#.#.
+..###..###
+
+Tile 1951:
+#.##...##.
+#.####...#
+.....#..##
+#...######
+.##.#....#
+.###.#####
+###.##.##.
+.###....#.
+..#.#..#.#
+#...##.#..
+
+Tile 1171:
+####...##.
+#..##.#..#
+##.#..#.#.
+.###.####.
+..###.####
+.##....##.
+.#...####.
+#.##.####.
+####..#...
+.....##...
+
+Tile 1427:
+###.##.#..
+.#..#.##..
+.#.##.#..#
+#.#.#.##.#
+....#...##
+...##..##.
+...#.#####
+.#.####.#.
+..#..###.#
+..##.#..#.
+
+Tile 1489:
+##.#.#....
+..##...#..
+.##..##...
+..#...#...
+#####...#.
+#..#.#.#.#
+...#.#.#..
+##.#...##.
+..##.##.##
+###.##.#..
+
+Tile 2473:
+#....####.
+#..#.##...
+#.##..#...
+######.#.#
+.#...#.#.#
+.#########
+.###.#..#.
+########.#
+##...##.#.
+..###.#.#.
+
+Tile 2971:
+..#.#....#
+#...###...
+#.#.###...
+##.##..#..
+.#####..##
+.#..####.#
+#..#.#..#.
+..####.###
+..#.#.###.
+...#.#.#.#
+
+Tile 2729:
+...#.#.#.#
+####.#....
+..#.#.....
+....#..#.#
+.##..##.#.
+.#.####...
+####.#.#..
+##.####...
+##..#.##..
+#.##...##.
+
+Tile 3079:
+#.#.#####.
+.#..######
+..#.......
+######....
+####.#..#.
+.#...#.##.
+#.#####.##
+..#.###...
+..#.......
+..#.###...
+
+By rotating, flipping, and rearranging them, you can find a square arrangement that causes all adjacent borders to line up:
+
+#...##.#.. ..###..### #.#.#####.
+..#.#..#.# ###...#.#. .#..######
+.###....#. ..#....#.. ..#.......
+###.##.##. .#.#.#..## ######....
+.###.##### ##...#.### ####.#..#.
+.##.#....# ##.##.###. .#...#.##.
+#...###### ####.#...# #.#####.##
+.....#..## #...##..#. ..#.###...
+#.####...# ##..#..... ..#.......
+#.##...##. ..##.#..#. ..#.###...
+
+#.##...##. ..##.#..#. ..#.###...
+##..#.##.. ..#..###.# ##.##....#
+##.####... .#.####.#. ..#.###..#
+####.#.#.. ...#.##### ###.#..###
+.#.####... ...##..##. .######.##
+.##..##.#. ....#...## #.#.#.#...
+....#..#.# #.#.#.##.# #.###.###.
+..#.#..... .#.##.#..# #.###.##..
+####.#.... .#..#.##.. .######...
+...#.#.#.# ###.##.#.. .##...####
+
+...#.#.#.# ###.##.#.. .##...####
+..#.#.###. ..##.##.## #..#.##..#
+..####.### ##.#...##. .#.#..#.##
+#..#.#..#. ...#.#.#.. .####.###.
+.#..####.# #..#.#.#.# ####.###..
+.#####..## #####...#. .##....##.
+##.##..#.. ..#...#... .####...#.
+#.#.###... .##..##... .####.##.#
+#...###... ..##...#.. ...#..####
+..#.#....# ##.#.#.... ...##.....
+
+For reference, the IDs of the above tiles are:
+
+1951    2311    3079
+2729    1427    2473
+2971    1489    1171
+
+To check that you've assembled the image correctly, multiply the IDs of the four corner tiles together. If you do this with the assembled tiles from the example above, you get 1951 * 3079 * 2971 * 1171 = 20899048083289.
+
+Assemble the tiles into an image. What do you get if you multiply together the IDs of the four corner tiles?
+
+Your puzzle answer was 17032646100079.
+--- Part Two ---
+
+Now, you're ready to check the image for sea monsters.
+
+The borders of each tile are not part of the actual image; start by removing them.
+
+In the example above, the tiles become:
+
+.#.#..#. ##...#.# #..#####
+###....# .#....#. .#......
+##.##.## #.#.#..# #####...
+###.#### #...#.## ###.#..#
+##.#.... #.##.### #...#.##
+...##### ###.#... .#####.#
+....#..# ...##..# .#.###..
+.####... #..#.... .#......
+
+#..#.##. .#..###. #.##....
+#.####.. #.####.# .#.###..
+###.#.#. ..#.#### ##.#..##
+#.####.. ..##..## ######.#
+##..##.# ...#...# .#.#.#..
+...#..#. .#.#.##. .###.###
+.#.#.... #.##.#.. .###.##.
+###.#... #..#.##. ######..
+
+.#.#.### .##.##.# ..#.##..
+.####.## #.#...## #.#..#.#
+..#.#..# ..#.#.#. ####.###
+#..####. ..#.#.#. ###.###.
+#####..# ####...# ##....##
+#.##..#. .#...#.. ####...#
+.#.###.. ##..##.. ####.##.
+...###.. .##...#. ..#..###
+
+Remove the gaps to form the actual image:
+
+.#.#..#.##...#.##..#####
+###....#.#....#..#......
+##.##.###.#.#..######...
+###.#####...#.#####.#..#
+##.#....#.##.####...#.##
+...########.#....#####.#
+....#..#...##..#.#.###..
+.####...#..#.....#......
+#..#.##..#..###.#.##....
+#.####..#.####.#.#.###..
+###.#.#...#.######.#..##
+#.####....##..########.#
+##..##.#...#...#.#.#.#..
+...#..#..#.#.##..###.###
+.#.#....#.##.#...###.##.
+###.#...#..#.##.######..
+.#.#.###.##.##.#..#.##..
+.####.###.#...###.#..#.#
+..#.#..#..#.#.#.####.###
+#..####...#.#.#.###.###.
+#####..#####...###....##
+#.##..#..#...#..####...#
+.#.###..##..##..####.##.
+...###...##...#...#..###
+
+Now, you're ready to search for sea monsters! Because your image is monochrome, a sea monster will look like this:
+
+                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   
+
+When looking for this pattern in the image, the spaces can be anything; only the # need to match. Also, you might need to rotate or flip your image before it's oriented correctly to find sea monsters. In the above image, after flipping and rotating it to the appropriate orientation, there are two sea monsters (marked with O):
+
+.####...#####..#...###..
+#####..#..#.#.####..#.#.
+.#.#...#.###...#.##.O#..
+#.O.##.OO#.#.OO.##.OOO##
+..#O.#O#.O##O..O.#O##.##
+...#.#..##.##...#..#..##
+#.##.#..#.#..#..##.#.#..
+.###.##.....#...###.#...
+#.####.#.#....##.#..#.#.
+##...#..#....#..#...####
+..#.##...###..#.#####..#
+....#.##.#.#####....#...
+..##.##.###.....#.##..#.
+#...#...###..####....##.
+.#.##...#.##.#.#.###...#
+#.###.#..####...##..#...
+#.###...#.##...#.##O###.
+.O##.#OO.###OO##..OOO##.
+..O#.O..O..O.#O##O##.###
+#.#..##.########..#..##.
+#.#####..#.#...##..#....
+#....##..#.#########..##
+#...#.....#..##...###.##
+#..###....##.#...##.##.#
+
+Determine how rough the waters are in the sea monsters' habitat by counting the number of # that are not part of a sea monster. In the above example, the habitat's water roughness is 273.
+
+How many # are not part of a sea monster?
+
+Your puzzle answer was 2006.
+
+Both parts of this puzzle are complete! They provide two gold stars: **
+
+At this point, you should return to your Advent calendar and try another puzzle.
+
+==========================================================================================
+
+Das hier ist die zweite Version.
+In der ersten wurde ein rekursiver Tiefensuchalgorithmus verwendet.
+Für den Beispieldatensatz war das noch in Ordnung. Für den Datensatz der Aufgabebe konnte aber keine Lösung ermittelt ewrden - 
+der Algorithmus braucht zu lange.
+Eine Analyse ergab, dass höchstens 10 Fotos richtig sortiert wurden - der Suchbaum ist zu gross und zu mächtig.
+-> erstma Abbruch.
+
+Zweiter Ansatz.
+Grundlage sind die Mengen aller möglichen Foto-Kanten (orginal/gekippt) pro Bild.
+Es wird nun nicht mehr blind ein (Foto)-Exemplar genommen. Vielmehr werden die Daten im Vorfeld vorbereitet.
+
+Zwei Fotos werden als Nachbarn definiert, wenn es in den Mengen der Foto-Kanten der beiden Fotos Übereinstimmungen gibt 
+(der Durchschnitt der Kanten-Mengen der beiden Fotos ist nicht leer).
+
+In der finalen Version habe ich nicht nur die Kanten vewaltet - sondern die Gesamtheit der Bildaten.
+Dies war für den Übergang zur Monstersuche (Task2) notwendig.
+Hierfür wird numpy benutzt (Methoden für "schnelle" Matrix-Ops -> u.a. Rotation/Flipping.).
+
+Von dieser Definition (der Nachbarkeits-Beziehung zwischen Fotos) ausgehend, werden zwei Verzeichnisse erstellt.
+- Nachbarn: 
+	- Schlüssel: Foto id
+	- Wert: Liste aller Foto IDs, die bezüglich dem Schlüssel Nachbarn sind
+- N_NACHBAR_FOTO_ID_DIR: 
+	-Schlüssel:i (2,3,4)
+	- Wert: Liste alle Fotos ids, bei denen die Menge der Nachbarn den Umfang "i" besitzt.
+		-> N_NACHBAR_FOTO_ID_DIR[2] wäre dann die Liste aller Ecken (eine Ecke hat 2 Nachbarn)
+	
+Nun wird eine Lösungsliste aufgebaut.
+Erste Iteration: NUR die Nachbarschaftsbeziehungen werden ausgwertet. Die Orientierung wird hier noch nicht betrachtet.
+Start: lösung[0] := eine beliebige Ecke. ("links-oben")
+Zeilenweise wird nun die Lösung aufgebaut.
+Für den nächste freien Platz wird aus der Menge der noch zur Verfügung stehenden Fotos eins ausgewählt, unter Berücksichtigung:
+- in der Lösung "links" und "oben" stehende Fotos sind Nachbarn für das neu einzufügende Foto
+- dieses Foto hat genau so viele Nachbarn wie es seinen aktuellen Platz in der Lösungsmatrix entspricht.
+	(in den Ecken -> 2, auf der Kante (und nicht der Ecke) -> 3, sonst -> 4)
+
+In der zweiten Iteration wird die Orientierung der Fotos (Rotation/Flipping) betrachtet.
+Ausgang: linke obere Ecke, und deren beiden Nachbarn.
+Diese werde solange gedreht und geflippt, bis die Orientierung dieser drei Fotos korrekt ist (die Kantenbeziehungen dieser drei Fotos stimmen überein).
+
+Nun wird vom zweiten Foto beginnend die Orientierung korrigiert.
+Es wird ein Nachbar ausgewählt (linker oder oberer). Das aktuelle Foto wird so lange gedreht/geflippt, bis diese EINE Kantenbeziehungen übereinstimmt.
+
+Zum Schluss wirde überpüft, ob alle Kantenbeziehungen aller Fotos zu allen Nachbarn ok sind.
+
+Für die eigentlche Monstersuche muss zunächst ein "big_picture" aufgebaut werden (Ignorierung der Kanten der Orignal-Fotos).
+In diesem "big_picture" wird nun das "monster" gesucht.
+Auch hierfür werden Methoden aus dem Numpy-Modul verwendet.
+Wenn die Suche nicht efolgreich war, wird rotiert/geflippt und die Suche wiederholt.
+Wenn das Monster gefunden wurde, wird die "Gefährlichkeit des Gewässers" berechnet und zurück gegeben.
+'''
+
 import time
 from collections import deque
 import math
@@ -327,16 +656,3 @@ while True:
         break
 
 print(findings, time.perf_counter()-start)
-        
-
-
-
-        
-    
-
-    
-
-
-
-
-
