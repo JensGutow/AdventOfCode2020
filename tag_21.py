@@ -51,6 +51,7 @@ Foods	Ingiedients					Allergene
 - Allergen list kann unvollständig (für das food) sein
 	
 Aufgabe_1:
+=========
 	Finde heraus, welche Ingiedients haben KEINE Allergene und wie oft kommen diese in der Eingabeliste vor
 	(Im Beispiel: kfcds, nhms, sbzzf, or trh -> enthalten kein Allergen)
 		Das sind 4 Allergene, sbzzf kommt 2 mal, alle anderen 1 mal in der Eingabeliste vor -> Summe = 5
@@ -85,10 +86,10 @@ Ideen:
             Z_not = Z - Z(a)
             for z in Z_not:
                 entferne Allergen a aus AlergenByZutat[zutat]
-'''
-import time
-from collections import defaultdict, Counter
 
+Aufgabe 2:
+==========
+'''
 def get_puzzle(file_name):
     p = []
     zutaten = None
@@ -112,39 +113,52 @@ def print_alergene_by_zutat():
     for z, a in AlergenByZutat.items():
         print(z,a)
 
-# print("start")
-# print_alergene_by_zutat()
-# print()
-
 for a in allergen_set:
     zutaten = zutaten_set.copy()
     # Ermittle alle möglichen Zutaten aller foods die a enthaletn (könnten)
     for z,food_allergene in foods:
         if a in food_allergene:
             zutaten = zutaten.intersection(z)
-    # die Differenzmenge dieser Zutaten kann jetzt NICHT mehr a enthateln -> streiche deshalb a raus
+    # die Differenzmenge dieser Zutaten kann jetzt NICHT mehr a enthalten -> streiche deshalb a raus
     andereZutaten = zutaten_set.difference(zutaten)
     for andereZutat in andereZutaten:
         AlergenByZutat[andereZutat].discard(a)
 
-# print("end")
-# print_alergene_by_zutat()
-
 # menge der Zutaten, die keine Allergene entalten
 ZutatenOhneAlergene = [z for z in zutaten_set if len(AlergenByZutat[z]) == 0]
-#print("\nzutaten ohne allergene:", ZutatenOhneAlergene)
-# Zähle, wie oft diese Zutaten in  der Eingabeliste vorkommen
-l1 = sum([len(set(zutaten).intersection(ZutatenOhneAlergene)) for (zutaten,_) in foods  ])
-print("summe aller Zutaten ohne allergen in foods:", l1)
+# Wie oft befinden sich Zutaten in den Foods die ohne Alergene sind?
+l1 = sum([len(set(zutaten).intersection(ZutatenOhneAlergene)) for (zutaten,_) in foods])
+print("Task 1: (summe aller Zutaten ohne allergen in foods):", l1)
 
+#task 2 - cleanup zutaten-allergen dir
+weiter = True
+while weiter:
+    weiter = False
+    # Menge von Alergen, für die gilt: len(ZutatenOhneAlergene)==1
+    a_set = set()
+    for a  in AlergenByZutat.values():
+        if len(a) == 1:
+            a_set = a_set.union(a)
 
-
-
-
-
+    # finde zutaten die a und weitere Alergen enthalten
+    z_list = [z for (z,a) in AlergenByZutat.items() if len(a.union(a_set))!=0 and len(a)>1]
+    if z_list:
+        weiter = True
+        #lösche alle a_set
+        for a in a_set:
+            for z in z_list:
+                AlergenByZutat[z].discard(a)
+print("Task2")
+# suche nun zutaten-allergen-Pärchen, mit len(Allergen)>0 (ist nicht leer)
+l2 = [(z,a_item) for (z,a) in AlergenByZutat.items() if len(a)>0 for a_item in a]
+# sortiere die Liste nach dem Allergen (dem zweiten Element des Tupels)
+l2.sort(key=lambda tup: tup[1])
+first = True
+s = ""
+for z in l2:
+    if not first:
+        s+= ","
+    s+= z[0]
+    first = False
+print(s)
     
-
-
-# print("Zutaten (alle):", zutaten_set)
-# print("Allergnee (alle):", allergen_set)
-
