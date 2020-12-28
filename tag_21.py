@@ -177,12 +177,4 @@ l2 = [(z,a_item) for (z,a) in AlergenByZutat.items() if len(a)>0 for a_item in a
 # sortiere die Liste nach dem Allergen (dem zweiten Element des Tupels)
 l2.sort(key=lambda tup: tup[1])
 # Ausgabe der nach Alergen sorierten Zutaten(Komma getrennt)
-first = True
-s = ""
-for z in l2:
-    if not first:
-        s+= ","
-    s+= z[0]
-    first = False
-print(s)
-    
+print(",".join([z for (z,_) in l2]))
