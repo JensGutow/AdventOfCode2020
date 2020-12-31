@@ -66,25 +66,38 @@ def read_input(file_name):
         return int(f.readline().strip()), int(f.readline().strip())
 
 
-def transform(subj, loop_size, expected=None):
+def transform(subj, loop_size, expected=None, loop_sizes=None):
     val = 1
     for i in range(loop_size):
         val *= subj
         val %= 20201227
+        if expected:
+            if val in expected:
+                inx = expected.index(val)
+                loop_sizes[inx] = i + 1 # because range() starts at 0
+                if all(loop_sizes):
+                    return True
         if val == expected:
             return i + 1  # because range() starts at 0
     return val if expected is None else None
 
 
 def bruteforce(keys, max_loop_size=100_000_000):
-    return tuple(transform(7, max_loop_size, pub) for pub in keys)
+    loops = [False for key in keys]
+    transform(7, max_loop_size, keys, loops)
+    return loops
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
+    print("Task 1")
     pub = read_input("tag_25.txt")
-    print('Brute-forcing keys...')
+    print("pubs:",pub)
+    print("Brut-frocing for loopsizes (the pivate keys)")
     prv = bruteforce(pub)
-    print('Private keys are: {0}'.format(prv))
-    print('Calculating encryption key...')
-    print('The encryption key is: {0}'.format(
-        transform(pub[0], prv[1])))
+    print("prv-keys",prv)
+    print("Calc the enc keys")
+    enc_keys = [transform(i[0], i[1]) for i in [(pub[0], prv[1]),(pub[1], prv[0])]]
+    print(enc_keys)
+    if (enc_keys[0] == enc_keys[1]):
+        print("keys for card and door are identical.")
+    else:
+        print("keys for card and door are different.")
